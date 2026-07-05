@@ -1,0 +1,115 @@
+# Configuration for "Run 2" -- a SEPARATE PERSON's data collection,
+# extending the drop-height range upward (1.1-1.49 m) with more repeats
+# per height (20-21 vs. Run 1's 15-17). Run 1 (config_run1.yaml) and Run 2
+# are independent datasets/experimental setups (different person,
+# possibly different ball/room/phone), so it is expected and fine for
+# them to need different Physical Consistency Filter tolerances -- see
+# the consistency_filter block below for why Run 2 specifically needed
+# tighter values than Run 1's validated 1.7/1.4. Keep each run's config
+# self-contained and independently reproducible (this file was briefly,
+# confusingly, an in-place edit of config_run1.yaml -- it has since been
+# split back out into its own file).
+#
+# background_file below is REUSED byte-for-byte from Run 1
+# (data/raw/run1/background_run1.xls and data/raw/run2/background_run1.xls
+# are identical) -- i.e. no fresh background was recorded for this
+# session. This is exactly the situation that caused Run 1's own
+# documented bug #6 (an ~8 dB session-to-session noise-floor mismatch
+# badly corrupted an initial result) -- it has NOT caused an obvious
+# repeat of that specific symptom here (segmentation looks stable, trial
+# counts look sane), but it has not been actively ruled out either. If
+# 1.4/1.49 m's poor results below don't fully resolve, a mismatched
+# threshold from the reused background is worth checking directly
+# (compare this threshold against a quiet-window estimate taken from
+# inside e.g. the 1.1 m file itself, the same way Run 1's mismatch was
+# originally diagnosed).
+#
+# Workflow is identical to config.yaml: drop a new phyphox export into
+# data_dir, add one `height: filename` line under height_files, re-run
+#   python main.py config_run2.yaml
+
+data_dir: data/raw/run2
+figures_dir: figures/run2
+results_csv: report/run2_results_summary.csv
+processed_dir: data/processed/run2
+
+g_ref: 9.783
+height_uncertainty_m: 0.02
+restitution_estimate: 0.8
+
+background_file: background_run1.xls
+
+height_files:
+  1.49: amp_1.49m_20bounce.xls
+  1.4: amp_1.4m_22bounce.xls
+  1.3: amp_1.3m_20bounce.xls
+  1.2: amp_1.2m_20bounce.xls
+  1.1: amp_1.1m_21bounce.xls
+  1.0: amp_1.0m_20bounce.xls
+  0.9: amp_0.9m_20bounce.xls
+  0.8: amp_0.8m_20bounce.xls
+  0.7: amp_0.7m_20bounce.xls
+  0.6: amp_0.6m_20bounce.xls
+  0.5: amp_0.5m_20bounce.xls
+  0.4: amp_0.4m_20bounce.xls
+  0.3: amp_0.3m_20bounce2.xls
+
+cleaning:
+  background_trim_s: 10.0
+  trial_trim_s: 1.5
+
+detection:
+  k_sigma: 5.0
+  min_separation_s: 0.05
+
+segmentation:
+  min_gap_s: 1.5
+  min_impacts_per_group: 2
+
+fitting:
+  nyquist_factor: 2.0
+  reliability_power: 1.0
+
+# Tightened from Run 1's validated 1.7/1.4 (see config_run1.yaml --
+# tuned/validated separately against the 0.3-1.2 m dataset, do not assume
+# it transfers) after inspecting Run 2's own interval_summary.csv for
+# 1.1/1.2/1.4 m: pooling every dt_n/expected_dt_n(h0,n) ratio across all
+# five Run 2 heights showed a clean gap -- every legitimate-looking
+# interval sits at or below ~0.96 of its expected value, while every
+# corrupted one (merged/missed bounce, or an outright energy-gaining
+# dt_(n+1) > dt_n sequence) sits at 1.0 or above. abs_tolerance_factor=1.2
+# and ratio_ceiling=1.2 sit in that gap with margin on both sides (an
+# initial 1.3 was tried for the abs check and rejected: the single
+# largest 1.1 m outlier had a ratio of 1.294, only just above 1.3, so it
+# slipped through by a hair and 1.1 m's result did not move at all).
+# Re-validated against synthetic data (full detect+filter pipeline, e in
+# 0.5-0.9, 7 heights) before use: false-rejection rate (clean trials
+# pushed below 2 usable intervals) rises from ~15% at Run 1's 1.7/1.4
+# settings to ~20-25% here -- a real, accepted cost for catching the
+# specific corrupted intervals found in this run, not a free tightening.
+# ratio_ceiling=1.2 will NOT catch the mildest energy-gain violations
+# (e.g. an implied e of 1.01-1.02, barely above the e<1 physical limit) --
+# tightening further to ~1.05 to catch those was tried and rejected: it
+# roughly doubles the false-rejection rate for genuinely high-restitution
+# (e~0.85-0.9) trials without a proportionate gain.
+#
+# This fixed 1.1/1.2 m (both had unambiguous corruption -- a merged-bounce
+# outlier and/or an impossible e>=1 energy gain) but did NOT fix 1.4/1.49 m:
+# 1.4 m has a residual corruption pattern (large Delta t_1 followed by an
+# anomalously small Delta t_2) that neither check catches, and 1.49 m
+# actually got WORSE under these tighter settings -- its trials have a
+# genuinely higher restitution than the assumed restitution_estimate=0.8,
+# and because the absolute ceiling is restitution_estimate^n (compounding
+# with bounce number n), a fixed tolerance factor increasingly
+# false-flags legitimate higher-e trials at higher n. 1.4/1.49 m remain
+# open problems, not resolved by this filter lever -- see
+# report/process_overview.md for the fuller diagnosis.
+consistency_filter:
+  enabled: true
+  abs_tolerance_factor: 1.2
+  ratio_ceiling: 1.2
+  max_leading_drop: 2
+
+plots:
+  save_summary: true
+  save_per_height: true      # also save each height's segmentation diagram + every trial's fit/residual plots

@@ -1,7 +1,14 @@
 # Configuration for "Full Data Run 1" -- a fresh, more careful data
-# collection pass (more repeats per height: 15 vs. the test run's 5).
+# collection pass (more repeats per height: 15-17 vs. the test run's 5).
 # Every output path is isolated under a "run1" namespace so this never
-# overwrites or mixes with the earlier test-data outputs (config.yaml).
+# overwrites or mixes with the earlier test-data outputs (config.yaml)
+# or Run 2's outputs (config_run2.yaml).
+#
+# Run 1 and Run 2 (config_run2.yaml) are independent datasets from two
+# different people/experimental setups -- it is expected and fine for
+# them to need different Physical Consistency Filter tolerances (see
+# consistency_filter below); do not "harmonise" the two configs to match
+# without re-validating each dataset's own filter needs.
 #
 # Workflow is identical to config.yaml: drop a new phyphox export into
 # data_dir, add one `height: filename` line under height_files, re-run
@@ -52,6 +59,17 @@ fitting:
   nyquist_factor: 2.0
   reliability_power: 1.0
 
+# Physical Consistency Filter: drop/truncate a trial's own detected impacts
+# if they produce a Delta t_n sequence the bounce model says is implausible
+# (see bounce_detection.filter_plausible_bounce_times). Both tolerances are
+# deliberately generous -- validated against synthetic data to have a low
+# false-positive rate (~1.5% at ratio_ceiling=1.4 under 15% measurement
+# noise) while still catching real anomalies (e.g. a missed first bounce
+# inflating Delta t_1 to ~3x the plausible value). These values are
+# specific to Run 1's own data and detection characteristics -- Run 2
+# (config_run2.yaml) needed meaningfully tighter values (1.2/1.2) for its
+# own corrupted intervals; that is a property of the two different
+# datasets, not evidence either value is "more correct" in general.
 consistency_filter:
   enabled: true
   abs_tolerance_factor: 1.7
