@@ -1,0 +1,60 @@
+# Configuration for main.py. Add a new height trial by dropping its phyphox
+# export into data_dir and adding one line under height_files -- no code or
+# notebook edits needed.
+
+data_dir: data/raw
+figures_dir: figures
+results_csv: report/results_summary.csv
+processed_dir: data/processed
+
+g_ref: 9.783              # reference value to compare against (m/s^2)
+height_uncertainty_m: 0.005  # assumed drop-height measurement uncertainty (ALL heights)
+restitution_estimate: 0.8    # only used to size the per-height resolvable-bounce-count ceiling
+
+background_file: background_noise.xls
+
+# height (m): phyphox Audio Amplitude export filename (relative to data_dir)
+height_files:
+  0.3: amp_0.3m_5bounce_test.xls
+  0.4: amp_0.4m_5bounce_test.xls
+  0.5: amp_0.5m_5bounce_test.xls
+  0.6: amp_0.6m_5bounce_test.xls
+  0.7: amp_0.7m_5bounce_test.xls
+  0.8: amp_0.8m_5bounce_test.xls
+  0.9: amp_0.9m_5bounce_test.xls
+  1.0: amp_1.0m_5bounce_test.xls
+  1.1: amp_1.1m_5bounce_test.xls
+  1.2: amp_1.2m_5bounce_test.xls
+
+cleaning:
+  background_trim_s: 10.0   # trim each side of the (long) background recording
+  trial_trim_s: 1.5         # trim each side of each (short) height recording
+
+detection:
+  k_sigma: 5.0               # background threshold = mean + k_sigma * std
+  min_separation_s: 0.05     # matches Audio Amplitude's ~123 ms sampling
+
+segmentation:
+  min_gap_s: 1.5             # silence gap that separates repeated drops within one file
+  min_impacts_per_group: 2   # a trial needs >= 2 impacts (1 interval) to contribute anything
+
+fitting:
+  nyquist_factor: 2.0        # passed to resolvable_bounce_count's aliasing-floor ceiling
+  reliability_power: 1.0     # down-weight bounce n by 1/n^power within the ceiling; 0 disables
+
+# Physical Consistency Filter: drop/truncate a trial's own detected impacts
+# if they produce a Delta t_n sequence the bounce model says is implausible
+# (see bounce_detection.filter_plausible_bounce_times). Both tolerances are
+# deliberately generous -- validated against synthetic data to have a low
+# false-positive rate (~1.5% at ratio_ceiling=1.4 under 15% measurement
+# noise) while still catching real anomalies (e.g. a missed first bounce
+# inflating Delta t_1 to ~3x the plausible value).
+consistency_filter:
+  enabled: true
+  abs_tolerance_factor: 1.7   # Delta t_n must be <= expected_interval(h0, n) * this
+  ratio_ceiling: 1.4          # Delta t_(n+1)/Delta t_n must be <= this (model predicts < 1)
+  max_leading_drop: 2         # try dropping up to this many leading impacts (stray blip before the real sequence)
+
+plots:
+  save_summary: true         # save the final g-vs-height plot to figures_dir
+  save_per_height: false     # also save each height's segmentation+fit plots (verbose, slower)

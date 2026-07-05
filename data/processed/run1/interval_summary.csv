@@ -1,0 +1,16 @@
+height_m,trial_label,method,dt1_s,dt2_s,dt3_s
+0.3,h0=0.3 m trial 2,own_fit,0.6225224610000009,0.24827207099999882,0.25428796799999986
+0.3,h0=0.3 m trial 4,own_fit,0.6179521100000009,0.2514195699999995,0.25243406199999896
+0.3,h0=0.3 m trial 6,own_fit,0.3682893749999998,0.4942973049999999,
+0.3,h0=0.3 m trial 8,own_fit,0.48513960899999375,0.3670264450000005,
+0.3,h0=0.3 m trial 9,own_fit,0.24739136700000586,0.24396210999999823,
+0.3,h0=0.3 m trial 11,own_fit,0.24761331999999925,0.23819562500000302,0.2388807419999992
+0.3,h0=0.3 m trial 13,own_fit,0.3531529689999928,0.4815045309999988,
+0.3,h0=0.3 m trial 0 (rescued),shared_slope_rescue,0.2568888280000001,,
+0.3,h0=0.3 m trial 1 (rescued),shared_slope_rescue,0.24522062499999997,,
+0.3,h0=0.3 m trial 3 (rescued),shared_slope_rescue,0.24482874999999993,,
+0.3,h0=0.3 m trial 5 (rescued),shared_slope_rescue,0.23707035099999985,,
+0.3,h0=0.3 m trial 7 (rescued),shared_slope_rescue,0.6062586719999956,,
+0.3,h0=0.3 m trial 10 (rescued),shared_slope_rescue,0.23578941399999565,,
+0.3,h0=0.3 m trial 12 (rescued),shared_slope_rescue,0.22306273399999554,,
+0.3,h0=0.3 m trial 14 (rescued),shared_slope_rescue,0.3470580860000041,,

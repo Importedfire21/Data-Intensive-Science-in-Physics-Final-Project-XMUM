@@ -1,0 +1,51 @@
+# Configuration for "Full Data Run 1" -- a fresh, more careful data
+# collection pass (more repeats per height: 15 vs. the test run's 5).
+# Every output path is isolated under a "run1" namespace so this never
+# overwrites or mixes with the earlier test-data outputs (config.yaml).
+#
+# Workflow is identical to config.yaml: drop a new phyphox export into
+# data_dir, add one `height: filename` line under height_files, re-run
+#   python main.py config_run1.yaml
+
+data_dir: data/raw/run1
+figures_dir: figures/run1
+results_csv: report/run1_results_summary.csv
+processed_dir: data/processed/run1
+
+g_ref: 9.783
+height_uncertainty_m: 0.005
+restitution_estimate: 0.8
+
+# Reused from the test-data run (same room/setup) -- a copy lives in
+# data/raw/run1/ so this config stays self-contained. Replace with a
+# Run-1-specific background recording if/when one is taken.
+background_file: background_noise.xls
+
+height_files:
+  0.3: amp_0.3m_15bounce.xls
+
+cleaning:
+  background_trim_s: 10.0
+  trial_trim_s: 1.5
+
+detection:
+  k_sigma: 5.0
+  min_separation_s: 0.05
+
+segmentation:
+  min_gap_s: 1.5
+  min_impacts_per_group: 2
+
+fitting:
+  nyquist_factor: 2.0
+  reliability_power: 1.0
+
+consistency_filter:
+  enabled: true
+  abs_tolerance_factor: 1.7
+  ratio_ceiling: 1.4
+  max_leading_drop: 2
+
+plots:
+  save_summary: true
+  save_per_height: false
