@@ -13,16 +13,28 @@ results_csv: report/run1_results_summary.csv
 processed_dir: data/processed/run1
 
 g_ref: 9.783
-height_uncertainty_m: 0.005
+height_uncertainty_m: 0.02
 restitution_estimate: 0.8
 
-# Reused from the test-data run (same room/setup) -- a copy lives in
-# data/raw/run1/ so this config stays self-contained. Replace with a
-# Run-1-specific background recording if/when one is taken.
-background_file: background_noise.xls
+# Dedicated Run 1 background (~200 s), recorded for this session -- NOT
+# the reused test-data background. Its noise floor (mean=-49.2 dB) turned
+# out meaningfully different from both the old test-data background
+# (-52.8 dB) and the ad hoc quiet-trough estimate taken from inside the
+# 0.3 m trial file itself (-43.8 dB) -- reinforcing why a real, dedicated
+# background recording per session matters rather than reusing/improvising.
+background_file: background_run1.xls
 
 height_files:
   0.3: amp_0.3m_15bounce.xls
+  0.4: amp_0.4m_15bounce.xls
+  0.5: amp_0.5m_15bounce.xls
+  0.6: amp_0.6m_16bounce.xls
+  0.7: amp_0.7m_16bounce.xls
+  0.8: amp_0.8m_15bounce.xls
+  0.9: amp_0.9m_15bounce.xls
+  1.0: amp_1.0m_16bounce.xls
+  1.1: amp_1.1m_17bounce.xls
+  1.2: amp_1.2m_16bounce.xls
 
 cleaning:
   background_trim_s: 10.0
@@ -48,4 +60,4 @@ consistency_filter:
 
 plots:
   save_summary: true
-  save_per_height: false
+  save_per_height: true      # also save each height's segmentation diagram + every trial's fit/residual plots

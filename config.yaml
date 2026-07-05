@@ -8,7 +8,7 @@ results_csv: report/results_summary.csv
 processed_dir: data/processed
 
 g_ref: 9.783              # reference value to compare against (m/s^2)
-height_uncertainty_m: 0.005  # assumed drop-height measurement uncertainty (ALL heights)
+height_uncertainty_m: 0.02   # assumed drop-height measurement uncertainty (ALL heights)
 restitution_estimate: 0.8    # only used to size the per-height resolvable-bounce-count ceiling
 
 background_file: background_noise.xls

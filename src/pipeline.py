@@ -58,9 +58,12 @@ def fit_bounce_sequence(times, sample_dt, h0, h0_err, max_bounce_n=None,
         n, dt_n = n[keep], dt_n[keep]
 
     ln_dt = np.log(dt_n)
-    # Timing uncertainty per bounce ~ half the local sampling interval;
-    # propagated to Delta t_n (difference of two times) and then to ln(dt).
-    sigma_t = sample_dt / 2
+    # Timing uncertainty per bounce from the recording's sampling
+    # resolution (GUM-style quantisation uncertainty, sample_dt/sqrt(12) --
+    # see fitting.resolution_uncertainty), propagated to Delta t_n
+    # (difference of two times, so the two samples' uncertainties add in
+    # quadrature: sqrt(2)*sigma_t) and then to ln(dt).
+    sigma_t = fitting.resolution_uncertainty(sample_dt)
     sigma_dt_n = np.sqrt(2) * sigma_t
     sigma_ln_dt = sigma_dt_n / dt_n
 
@@ -69,7 +72,9 @@ def fit_bounce_sequence(times, sample_dt, h0, h0_err, max_bounce_n=None,
         sigma_ln_dt = sigma_ln_dt / np.sqrt(reliability)
 
     fit = fitting.weighted_linear_fit(n, ln_dt, sigma_ln_dt)
-    g_val, g_err = fitting.g_from_intercept(fit.intercept, fit.intercept_err, h0, h0_err)
+    g_val, g_stat_err, g_syst_err = fitting.g_stat_syst_from_intercept(
+        fit.intercept, fit.intercept_err, h0, h0_err)
+    g_err = float(np.sqrt(g_stat_err**2 + g_syst_err**2))
 
     if make_plots:
         fig, axes = plt.subplots(1, 2, figsize=(11, 4))
@@ -94,6 +99,7 @@ def fit_bounce_sequence(times, sample_dt, h0, h0_err, max_bounce_n=None,
     return {
         "label": label, "h0": h0, "h0_err": h0_err,
         "fit": fit, "g": g_val, "g_err": g_err,
+        "g_stat_err": g_stat_err, "g_syst_err": g_syst_err,
         "n_used": len(n), "bounce_times": times, "method": "own_fit",
     }
 
@@ -121,14 +127,16 @@ def _fit_single_interval_with_shared_slope(times, sample_dt, h0, h0_err,
 
     n = 1.0
     ln_dt1 = np.log(dt_n[0])
-    sigma_t = sample_dt / 2
+    sigma_t = fitting.resolution_uncertainty(sample_dt)
     sigma_dt1 = np.sqrt(2) * sigma_t
     sigma_ln_dt1 = sigma_dt1 / dt_n[0]
 
     intercept = ln_dt1 - shared_slope * n
     intercept_err = np.sqrt(sigma_ln_dt1**2 + (n * shared_slope_err) ** 2)
 
-    g_val, g_err = fitting.g_from_intercept(intercept, intercept_err, h0, h0_err)
+    g_val, g_stat_err, g_syst_err = fitting.g_stat_syst_from_intercept(
+        intercept, intercept_err, h0, h0_err)
+    g_err = float(np.sqrt(g_stat_err**2 + g_syst_err**2))
 
     if make_plots:
         fig, ax = plt.subplots(figsize=(5, 4))
@@ -148,6 +156,7 @@ def _fit_single_interval_with_shared_slope(times, sample_dt, h0, h0_err,
     return {
         "label": label, "h0": h0, "h0_err": h0_err,
         "fit": None, "g": g_val, "g_err": g_err,
+        "g_stat_err": g_stat_err, "g_syst_err": g_syst_err,
         "n_used": 1, "bounce_times": times, "method": "shared_slope_rescue",
     }
 
@@ -312,14 +321,20 @@ def process_height_recording(df, h0, h0_err, threshold_db, min_gap_s=1.5,
 
 
 def combine_height_result(height_result):
-    """PDG-combine every trial's g within one process_height_recording()
-    result into a single per-height g +/- sigma with a chi^2/ndf across
-    trials.
+    """Combine every trial's g within one process_height_recording() result
+    into a single per-height g with statistical and systematic uncertainty
+    kept separate (see fitting.combine_repeats_stat_syst) and a chi^2/ndf
+    across trials (computed from the statistical uncertainty only, since
+    the systematic is shared/correlated across all trials at this height
+    and contributes no trial-to-trial scatter).
     """
     g_vals = np.array([r["g"] for r in height_result["trials"]])
-    g_errs = np.array([r["g_err"] for r in height_result["trials"]])
-    finite = np.isfinite(g_vals) & np.isfinite(g_errs)
-    return fitting.pdg_combine(g_vals[finite], g_errs[finite]), int((~finite).sum())
+    g_stat_errs = np.array([r["g_stat_err"] for r in height_result["trials"]])
+    g_syst_errs = np.array([r["g_syst_err"] for r in height_result["trials"]])
+    finite = np.isfinite(g_vals) & np.isfinite(g_stat_errs) & np.isfinite(g_syst_errs)
+    combo = fitting.combine_repeats_stat_syst(
+        g_vals[finite], g_stat_errs[finite], g_syst_errs[finite])
+    return combo, int((~finite).sum())
 
 
 def process_multi_drop_recording(df, heights, heights_err, threshold_db, min_gap_s=2.5,
