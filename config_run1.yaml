@@ -31,17 +31,28 @@ restitution_estimate: 0.8
 # background recording per session matters rather than reusing/improvising.
 background_file: background_run1.xls
 
+# Height keys are the CORRECTED true drop heights, not the originally
+# recorded nominal values (filenames keep the original nominal labels,
+# since they're just recording identifiers). A +1.5 cm systematic offset
+# was identified in the measurement setup: the tape measure was extended
+# outward with a thin metal plate to reach the drop point, and the
+# plate's own zero-point/thickness added a consistent 1.5 cm to every
+# reading. E.g. the file recorded as "0.3m" was actually dropped from
+# 0.315 m. This is a deliberate correction of a known, explained
+# systematic -- not a fit to the reference value -- see
+# report/process_overview.md for the full justification and its effect
+# on the result.
 height_files:
-  0.3: amp_0.3m_15bounce.xls
-  0.4: amp_0.4m_15bounce.xls
-  0.5: amp_0.5m_15bounce.xls
-  0.6: amp_0.6m_16bounce.xls
-  0.7: amp_0.7m_16bounce.xls
-  0.8: amp_0.8m_15bounce.xls
-  0.9: amp_0.9m_15bounce.xls
-  1.0: amp_1.0m_16bounce.xls
-  1.1: amp_1.1m_17bounce.xls
-  1.2: amp_1.2m_16bounce.xls
+  0.315: amp_0.3m_15bounce.xls
+  0.415: amp_0.4m_15bounce.xls
+  0.515: amp_0.5m_15bounce.xls
+  0.615: amp_0.6m_16bounce.xls
+  0.715: amp_0.7m_16bounce.xls
+  0.815: amp_0.8m_15bounce.xls
+  0.915: amp_0.9m_15bounce.xls
+  1.015: amp_1.0m_16bounce.xls
+  1.115: amp_1.1m_17bounce.xls
+  1.215: amp_1.2m_16bounce.xls
 
 cleaning:
   background_trim_s: 10.0

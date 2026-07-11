@@ -1,2 +1,6 @@
 # Beamer slide deck -- kept local only, not pushed to GitHub.
 slides/
+
+# Written report (LaTeX draft + generated PDF/notes) -- kept local only,
+# not pushed to GitHub, same reasoning as slides/.
+report/
