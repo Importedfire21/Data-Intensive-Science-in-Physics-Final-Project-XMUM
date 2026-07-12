@@ -72,19 +72,30 @@ fitting:
 
 # Physical Consistency Filter: drop/truncate a trial's own detected impacts
 # if they produce a Delta t_n sequence the bounce model says is implausible
-# (see bounce_detection.filter_plausible_bounce_times). Both tolerances are
-# deliberately generous -- validated against synthetic data to have a low
-# false-positive rate (~1.5% at ratio_ceiling=1.4 under 15% measurement
-# noise) while still catching real anomalies (e.g. a missed first bounce
-# inflating Delta t_1 to ~3x the plausible value). These values are
-# specific to Run 1's own data and detection characteristics -- Run 2
-# (config_run2.yaml) needed meaningfully tighter values (1.2/1.2) for its
-# own corrupted intervals; that is a property of the two different
-# datasets, not evidence either value is "more correct" in general.
+# (see bounce_detection.filter_plausible_bounce_times). Both tolerances were
+# selected via run1_grid_search-style optimization DIRECTLY on Run 1 (this
+# dataset): a grid search over abs_tolerance_factor x ratio_ceiling, with the
+# objective being cross-height chi2/ndf (internal compatibility between
+# independently measured heights) -- deliberately NOT pull vs g_ref, since
+# selecting nuisance parameters by matching a known reference value on the
+# reported dataset itself would be circular. Trial COUNT (160 usable trials)
+# is identical across the entire grid, ruling out a degenerate "discard
+# disagreeing trials" solution. abs_tolerance_factor is a broad plateau
+# (1.5-1.9 all tied at the optimum) -- kept at 1.7. ratio_ceiling=1.3
+# (tightened from an earlier default of 1.4) improves chi2/ndf from 3.32 to
+# 3.10. An earlier exploration tuned instead on the pilot dataset
+# (config.yaml) and found its single best point, (1.5, 1.6), generalised
+# poorly when applied to Run 1 untouched (chi2/ndf 3.32 -> 4.50) -- a real
+# overfitting result from the pilot's small ~5-repeat sample, documented in
+# the report's Appendix A rather than used for the final parameters. Run 2
+# (config_run2.yaml) needed meaningfully tighter values (1.2/1.2) for its own
+# corrupted intervals -- filter tolerances are dataset-specific, not
+# universal; see report/run1_filter_optimization_grid.csv and the report's
+# "Step 6" section for the full grid.
 consistency_filter:
   enabled: true
   abs_tolerance_factor: 1.7
-  ratio_ceiling: 1.4
+  ratio_ceiling: 1.3
   max_leading_drop: 2
 
 plots:
